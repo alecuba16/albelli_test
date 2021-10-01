@@ -2,7 +2,7 @@
 Albelli backend  (Laravel + swagger) and frontend (React+redux) test
 
 # Relationship between advertisements and offers.
-That relation is many-to-many that can be only broken by using a pivot table, which maps each individual advertisement id with each offer id. In laravel it can be done easily by following the conventions (first advertisements_offers table, etc) , then you have to manage the relation in the store, delete and update methods in order to not have consistency errors.
+That relation is many-to-many that can only be broken by using a pivot table, which maps each individual advertisement id with each offer id. In Laravel, it can be done quickly by following the conventions (first advertisements_offers table, etc), then you have to manage the relationship in the store, delete and update methods in order not to have consistency errors.
 
 ![](/screenshots/many-to-many.png?raw=true )
 
