@@ -9,24 +9,31 @@ That relation is many-to-many that can be only broken by using a pivot table, wh
 # Run the containers
 
 ## One command to have the app ready
+```
 docker-compose up --build -d frontend
-
+```
 Will run all the required containers (mysql,php,nginx,react build..)
 
 ## Only backend
-
+```
 docker-compose up --build -d nginx
-
+```
 # Ports
 
 ## Backend api url
+```
 localhost:8000/api
+```
 
-localhost:8000/api/documentation  is the swagger UI.
-
+Swagger UI url
+```
+localhost:8000/api/documentation
+```
 ## Frontend
+React application
+```
 localhost:8080
-
+```
 # Screenshots
 ## Backend
 ![](/screenshots/microservices.png?raw=true )
