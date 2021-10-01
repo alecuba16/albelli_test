@@ -1,0 +1,6 @@
+docker-compose down albelli && docker volume prune -f && docker image prune -f && docker-compose up --build -d nginx
+npm run dev
+php -dxdebug.mode=debug -dxdebug.start_with_request=yes -dxdebug.client_port=9000 -dxdebug.client_host=127.0.0.1 artisan serve
+
+docker-compose up --build -d mysql
+php artisan l5-swagger:generate

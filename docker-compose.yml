@@ -1,0 +1,125 @@
+version: '3.8'
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./configs/react.Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run start
+    stdin_open: true
+    depends_on:
+      - nginx 
+    networks:
+      - albelli
+      
+  nginx:
+    build:
+      context: .
+      dockerfile: ./configs/nginx.Dockerfile
+      args:
+        - NGINXUSER=${NGINXUSER:-www-data}
+        - NGINXGROUP=${NGINXGROUP:-www-data}
+    container_name: albellinginx
+    environment:
+      - APP_ENV=production
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - mysql
+      - php
+    networks:
+      - albelli
+
+  mysql:
+    image: mysql:8
+    container_name: albellimysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: alex
+      MYSQL_USER: alex
+      MYSQL_PASSWORD: alex
+      MYSQL_DATABASE: albelliapi
+    ports:
+      - "3306:3306"
+    volumes:
+      #- ./mysql/docker-entrypoint-initdb.d/mysql-init.js:/docker-entrypoint-initdb.d/mysql-init.js:ro
+      - mysqldata:/data/db
+    networks:
+      - albelli
+
+  php:
+    build:
+      context: .
+      dockerfile: ./configs/php.Dockerfile
+      args:
+        - PHPUSER=${PHPUSER:-www-data}
+        - PHPGROUP=${PHPGROUP:-www-data}
+    container_name: albelliphp
+    environment:
+      - APP_ENV=production
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./configs/run_migration.sh:/run_migration.sh:delegated
+    networks:
+      - albelli
+
+  composer:
+    build:
+      context: .
+      dockerfile: ./configs/composer.Dockerfile
+      args:
+        - PHPUSER=${PHPUSER:-www-data}
+        - PHPGROUP=${PHPGROUP:-www-data}
+    container_name: composer
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    user: ${PHPUSER:-www-data}
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - albelli
+
+  artisan:
+    build:
+      context: .
+      dockerfile: ./configs/php.Dockerfile
+      args:
+        - PHPUSER=${PHPUSER:-www-data}
+        - PHPGROUP=${PHPGROUP:-www-data}
+    container_name: artisan
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - mysql
+    working_dir: /var/www/html
+    entrypoint: [ 'php', '/var/www/html/artisan' ]
+    networks:
+      - albelli
+
+  npm:
+    image: node:13
+    container_name: npm
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - 3000:3000
+      - 3001:3001
+    working_dir: /var/www/html
+    entrypoint: [ 'npm' ]
+    networks:
+      - albelli
+
+networks:
+  albelli:
+    driver: bridge
+
+volumes:
+  mysqldata:
